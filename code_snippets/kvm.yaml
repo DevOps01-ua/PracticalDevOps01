@@ -1,0 +1,31 @@
+# .github/workflows/setup_kvm.yml
+name: Setup KVM
+on:
+  push:
+    branches: [ main ]
+jobs:
+  setup_kvm:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install KVM
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker
+        sudo kvm-ok
+    - name: Create VM
+      run: |
+        sudo virt-install \
+        --name my-vm \
+        --ram 2048 \
+        --disk path=/var/lib/libvirt/images/my-vm.img,size=10 \
+        --vcpus 1 \
+        --os-type linux \
+        --os-variant ubuntu18.04 \
+        --network bridge=virbr0 \
+        --graphics none \
+        --console pty,target_type=serial \
+        --location 'http://archive.ubuntu.com/ubuntu/dists/bionic/main/installer-amd64/' \
+        --extra-args 'console=ttyS0,115200n8 serial'
+        sudo virsh list --all

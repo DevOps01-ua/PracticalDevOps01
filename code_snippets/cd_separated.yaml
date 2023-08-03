@@ -1,0 +1,53 @@
+# .github/workflows/cd_frontend_backend.yml
+name: Build and Deploy Frontend and Backend
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Frontend
+    - name: Setup Node.js for Frontend
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12
+      working-directory: ./frontend
+
+    - name: Install Frontend Dependencies
+      run: npm ci
+      working-directory: ./frontend
+
+    - name: Run Frontend Tests
+      run: npm test
+      working-directory: ./frontend
+
+    - name: Build Frontend
+      run: npm run build
+      working-directory: ./frontend
+
+    - name: Deploy Frontend
+      run: ./deploy_frontend.sh
+      working-directory: ./frontend
+
+    # Backend
+    - name: Setup Node.js for Backend
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12
+      working-directory: ./backend
+
+    - name: Install Backend Dependencies
+      run: npm ci
+      working-directory: ./backend
+
+    - name: Run Backend Tests
+      run: npm test
+      working-directory: ./backend
+
+    - name: Start Backend
+      run: ./start_backend.sh
+      working-directory: ./backend
